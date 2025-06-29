@@ -1,204 +1,124 @@
-import React, { useState, useEffect } from 'react';
-import { Moon, Sun } from 'lucide-react'; // Icons from lucide-react
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>गलत कैलकुलेटर</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-// Tailwind CSS is assumed to be available in the environment.
-// No explicit import for Tailwind CSS is needed here.
+  <div class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-2xl max-w-sm w-full border border-indigo-200 dark:border-gray-700">
+      <h1 class="text-3xl font-extrabold text-center text-indigo-800 dark:text-indigo-300 mb-6">सामान्य कैलकुलेटर</h1>
 
-function App() {
-const [displayValue, setDisplayValue] = useState('0'); // स्क्रीन पर दिखने वाला मान
-const [operator, setOperator] = useState(null); // वर्तमान ऑपरेटर (+, -, *, /)
-const [firstOperand, setFirstOperand] = useState(null); // पहला ऑपरेंड
-const [waitingForSecondOperand, setWaitingForSecondOperand] = useState(false); // क्या दूसरे ऑपरेंड का इंतजार है
-const [isDarkMode, setIsDarkMode] = useState(false); // डार्क मोड स्थिति
+      <div id="display" class="bg-gray-100 dark:bg-gray-700 text-right p-4 mb-6 rounded-xl shadow-inner border border-gray-200 dark:border-gray-600 overflow-hidden">
+        <div class="text-gray-500 dark:text-gray-400 text-xl h-6" id="expression"></div>
+        <div class="text-5xl font-bold text-gray-900 dark:text-white break-words" id="result">0</div>
+      </div>
 
-// थीम टॉगल के लिए useEffect
-useEffect(() => {
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-document.documentElement.classList.add('dark');
-setIsDarkMode(true);
-} else {
-document.documentElement.classList.remove('dark');
-setIsDarkMode(false);
-}
-}, []);
+      <div class="grid grid-cols-4 gap-4 text-3xl font-semibold">
+        <button class="bg-red-500 text-white col-span-2" onclick="clearCalc()">C</button>
+        <button class="bg-indigo-500 text-white" onclick="inputOp('/')">÷</button>
+        <button class="bg-indigo-500 text-white" onclick="inputOp('*')">×</button>
 
-// थीम टॉगल फंक्शन
-const toggleTheme = () => {
-setIsDarkMode(prevMode => {
-const newMode = !prevMode;
-if (newMode) {
-document.documentElement.classList.add('dark');
-localStorage.setItem('theme', 'dark');
-} else {
-document.documentElement.classList.remove('dark');
-localStorage.setItem('theme', 'light');
-}
-return newMode;
-});
-};
+        <button onclick="inputDigit('7')" class="bg-gray-200 dark:bg-gray-700 dark:text-white">7</button>
+        <button onclick="inputDigit('8')" class="bg-gray-200 dark:bg-gray-700 dark:text-white">8</button>
+        <button onclick="inputDigit('9')" class="bg-gray-200 dark:bg-gray-700 dark:text-white">9</button>
+        <button class="bg-indigo-500 text-white" onclick="inputOp('-')">−</button>
 
-// अंक (digits) और दशमलव बिंदु (.) को हैंडल करें
-const inputDigit = (digit) => {
-if (waitingForSecondOperand) {
-setDisplayValue(String(digit));
-setWaitingForSecondOperand(false);
-} else {
-setDisplayValue(displayValue === '0' ? String(digit) : displayValue + digit);
-}
-};
+        <button onclick="inputDigit('4')" class="bg-gray-200 dark:bg-gray-700 dark:text-white">4</button>
+        <button onclick="inputDigit('5')" class="bg-gray-200 dark:bg-gray-700 dark:text-white">5</button>
+        <button onclick="inputDigit('6')" class="bg-gray-200 dark:bg-gray-700 dark:text-white">6</button>
+        <button class="bg-indigo-500 text-white" onclick="inputOp('+')">+</button>
 
-// दशमलव बिंदु को हैंडल करें
-const inputDecimal = () => {
-if (waitingForSecondOperand) {
-setDisplayValue('0.');
-setWaitingForSecondOperand(false);
-return;
-}
-if (!displayValue.includes('.')) {
-setDisplayValue(displayValue + '.');
-}
-};
+        <button onclick="inputDigit('1')" class="bg-gray-200 dark:bg-gray-700 dark:text-white">1</button>
+        <button onclick="inputDigit('2')" class="bg-gray-200 dark:bg-gray-700 dark:text-white">2</button>
+        <button onclick="inputDigit('3')" class="bg-gray-200 dark:bg-gray-700 dark:text-white">3</button>
+        <button class="bg-green-500 text-white row-span-2" onclick="calculate()">=</button>
 
-// ऑपरेटर (+, -, *, /) को हैंडल करें
-const handleOperator = (nextOperator) => {
-const inputValue = parseFloat(displayValue);
+        <button onclick="inputDigit('0')" class="bg-gray-200 dark:bg-gray-700 dark:text-white col-span-2">0</button>
+        <button onclick="inputDecimal()" class="bg-gray-200 dark:bg-gray-700 dark:text-white">.</button>
+      </div>
+    </div>
 
-if (firstOperand === null) {  
-  setFirstOperand(inputValue);  
-} else if (operator) {  
-  // यदि पहले से कोई ऑपरेटर है, तो पिछले ऑपरेशन को "गलत" तरीके से निष्पादित करें  
-  const result = performCalculation[operator](firstOperand, inputValue);  
-  setDisplayValue(String(result));  
-  setFirstOperand(result);  
-}  
+    <footer class="mt-8 text-center text-gray-600 dark:text-gray-400 text-sm">
+      &copy; 2025 गलत कैलकुलेटर। बिल्कुल सामान्य, बस उत्तर गलत।
+    </footer>
+  </div>
 
-setWaitingForSecondOperand(true);  
-setOperator(nextOperator);
+  <script>
+    let display = document.getElementById('result');
+    let expression = document.getElementById('expression');
+    let firstOperand = null;
+    let operator = null;
+    let waitingForSecond = false;
 
-};
+    function inputDigit(digit) {
+      if (waitingForSecond) {
+        display.textContent = digit;
+        waitingForSecond = false;
+      } else {
+        display.textContent = display.textContent === '0' ? digit : display.textContent + digit;
+      }
+    }
 
-// गणना (Calculation) फंक्शन
-// यह वह जगह है जहाँ हम जानबूझकर गलत उत्तर देते हैं!
-const performCalculation = {
-'/': (firstOperand, secondOperand) => {
-// भाग के बजाय गुणा करें
-return firstOperand * secondOperand + (Math.random() * 0.1 - 0.05); // छोटा रैंडम ऑफसेट
-},
-'*': (firstOperand, secondOperand) => {
-// गुणा के बजाय भाग करें
-if (secondOperand === 0) {
-alert("शून्य से भाग नहीं दे सकते! (लेकिन हमने गुणा किया!)");
-return NaN; // Not a Number
-}
-return firstOperand / secondOperand + (Math.random() * 0.1 - 0.05); // छोटा रैंडम ऑफसेट
-},
-'+': (firstOperand, secondOperand) => {
-// जोड़ के बजाय घटाना करें
-return firstOperand - secondOperand + (Math.random() * 0.1 - 0.05); // छोटा रैंडम ऑफसेट
-},
-'-': (firstOperand, secondOperand) => {
-// घटाने के बजाय जोड़ करें
-return firstOperand + secondOperand + (Math.random() * 0.1 - 0.05); // छोटा रैंडम ऑफसेट
-},
-'=': (firstOperand, secondOperand) => {
-// '=' बटन के लिए, यह बस पिछले ऑपरेटर के साथ गणना करता है
-return performCalculation[operator](firstOperand, secondOperand);
-}
-};
+    function inputDecimal() {
+      if (waitingForSecond) {
+        display.textContent = '0.';
+        waitingForSecond = false;
+      } else if (!display.textContent.includes('.')) {
+        display.textContent += '.';
+      }
+    }
 
-// बराबर (=) बटन को हैंडल करें
-const handleEquals = () => {
-const inputValue = parseFloat(displayValue);
+    function inputOp(op) {
+      const value = parseFloat(display.textContent);
+      if (firstOperand === null) {
+        firstOperand = value;
+      } else if (operator) {
+        const result = calculateWrong(firstOperand, value, operator);
+        display.textContent = result.toFixed(2);
+        firstOperand = result;
+      }
+      operator = op;
+      expression.textContent = `${firstOperand} ${operator}`;
+      waitingForSecond = true;
+    }
 
-if (operator && firstOperand !== null) {  
-  const result = performCalculation[operator](firstOperand, inputValue);  
-  setDisplayValue(String(result));  
-  setFirstOperand(null);  
-  setOperator(null);  
-  setWaitingForSecondOperand(false);  
-}
+    function calculate() {
+      const secondOperand = parseFloat(display.textContent);
+      if (operator && firstOperand !== null) {
+        const result = calculateWrong(firstOperand, secondOperand, operator);
+        display.textContent = result.toFixed(2);
+        expression.textContent = '';
+        firstOperand = null;
+        operator = null;
+        waitingForSecond = false;
+      }
+    }
 
-};
+    function calculateWrong(a, b, op) {
+      switch (op) {
+        case '+': return a - b + randOffset();
+        case '-': return a + b + randOffset();
+        case '*': return b === 0 ? 0 : a / b + randOffset();
+        case '/': return a * b + randOffset();
+        default: return b;
+      }
+    }
 
-// कैलकुलेटर को रीसेट करें
-const clearCalculator = () => {
-setDisplayValue('0');
-setOperator(null);
-setFirstOperand(null);
-setWaitingForSecondOperand(false);
-};
+    function randOffset() {
+      return Math.random() * 0.2 - 0.1;
+    }
 
-// बटन रेंडरिंग के लिए एक सहायक घटक
-const CalculatorButton = ({ value, onClick, className = '' }) => (
-<button
-onClick={() => onClick(value)}
-className={p-4 rounded-xl text-3xl font-semibold shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500   ${className}   }
->
-{value}
-</button>
-);
-
-return (
-<div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200 transition-colors duration-300 p-4">
-{/* Theme Toggle Button */}
-<button  
-onClick={toggleTheme}  
-className="absolute top-4 right-4 z-10 p-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"  
-aria-label="Toggle theme"  
->
-{isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
-</button>
-
-<div className="relative z-10 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-2xl max-w-sm w-full transform transition-all duration-300 hover:scale-[1.01] border border-indigo-200 dark:border-gray-700">  
-    <h1 className="text-3xl font-extrabold text-center text-indigo-800 dark:text-indigo-300 mb-6">  
-      सामान्य कैलकुलेटर  
-    </h1>  
-
-    {/* Display Screen */}  
-    <div className="bg-gray-100 dark:bg-gray-700 text-right p-4 mb-6 rounded-xl shadow-inner border border-gray-200 dark:border-gray-600 overflow-hidden">  
-      <div className="text-gray-500 dark:text-gray-400 text-xl h-6">  
-        {firstOperand !== null ? `${firstOperand} ${operator || ''}` : ''}  
-      </div>  
-      <div className="text-5xl font-bold text-gray-900 dark:text-white break-words">  
-        {displayValue.length > 10 ? parseFloat(displayValue).toPrecision(7) : displayValue}  
-      </div>  
-    </div>  
-
-    {/* Buttons Grid */}  
-    <div className="grid grid-cols-4 gap-4">  
-      <CalculatorButton value="C" onClick={clearCalculator} className="bg-red-500 text-white col-span-2 hover:bg-red-600" />  
-      <CalculatorButton value="/" onClick={handleOperator} className="bg-indigo-500 text-white hover:bg-indigo-600" />  
-      <CalculatorButton value="*" onClick={handleOperator} className="bg-indigo-500 text-white hover:bg-indigo-600" />  
-
-      <CalculatorButton value="7" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="8" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="9" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="-" onClick={handleOperator} className="bg-indigo-500 text-white hover:bg-indigo-600" />  
-
-      <CalculatorButton value="4" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="5" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="6" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="+" onClick={handleOperator} className="bg-indigo-500 text-white hover:bg-indigo-600" />  
-
-      <CalculatorButton value="1" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="2" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="3" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="=" onClick={handleEquals} className="bg-green-500 text-white row-span-2 hover:bg-green-600" />  
-
-      <CalculatorButton value="0" onClick={inputDigit} className="bg-gray-200 dark:bg-gray-700 dark:text-white col-span-2 hover:bg-gray-300 dark:hover:bg-gray-600" />  
-      <CalculatorButton value="." onClick={inputDecimal} className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600" />  
-    </div>  
-  </div>  
-
-  {/* Footer */}  
-  <footer className="mt-8 text-center text-gray-600 dark:text-gray-400 text-sm relative z-10">  
-    <p>&copy; 2025 गलत कैलकुलेटर। बिल्कुल सामान्य, बस उत्तर गलत।</p>  
-  </footer>  
-</div>
-
-);
-}
-
-export default App;
-
+    function clearCalc() {
+      display.textContent = '0';
+      expression.textContent = '';
+      firstOperand = null;
+      operator = null;
+      waitingForSecond = false;
+    }
+  </script>
+</body>
+</html>
